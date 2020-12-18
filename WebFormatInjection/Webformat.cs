@@ -26,8 +26,8 @@ namespace WebFormatInjection
 
         }
 
-
-        public HttpWebRequest CreateNewFormet(string _CRUD, string _Accept, string _ContentType, WebNeedDefualtHeader.Certificate _certificate, WebHeaderCollection _webHeaderCollection, string _userAgent = null)
+ 
+        public HttpWebRequest CreateNewFormat(CookieContainer cookie, string _CRUD, string _Accept, string _ContentType, WebNeedDefualtHeader.Certificate _certificate, WebHeaderCollection _webHeaderCollection, string _userAgent = null)
         {
             HttpWebRequest hwr = (HttpWebRequest)WebRequest.Create(requestUriString);
 
@@ -42,41 +42,6 @@ namespace WebFormatInjection
 
             hwr.Method = _CRUD;
             hwr.Accept = _Accept;
-
-            hwr.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None;
-            if (!string.IsNullOrEmpty(_ContentType))
-            {
-                hwr.ContentType = _ContentType;
-            }
-            if (!String.IsNullOrEmpty(Referer))
-            {
-                hwr.Referer = Referer;
-            }
-            if (_certificate.HasFlag(Certificate.True))
-            {
-                hwr.ServerCertificateValidationCallback = delegate { return true; };
-            }
-            hwr.Headers.Add(_webHeaderCollection);
-
-            return hwr;
-        }
-
-        public HttpWebRequest CreateNewFormet(CookieContainer cookie, string _CRUD, string _Accept, string _ContentType, WebNeedDefualtHeader.Certificate _certificate, WebHeaderCollection _webHeaderCollection, string _userAgent = null)
-        {
-            HttpWebRequest hwr = (HttpWebRequest)WebRequest.Create(requestUriString);
-
-            if (!String.IsNullOrEmpty(_userAgent))
-            {
-                hwr.UserAgent = _userAgent;
-            }
-            else
-            {
-                hwr.UserAgent = UserAgent;
-            }
-
-            hwr.Method = _CRUD;
-            hwr.Accept = _Accept;
-            hwr.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Whale/2.8.108.15 Safari/537.36";
             hwr.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None;
             if (!string.IsNullOrEmpty(_ContentType))
             {
@@ -95,24 +60,22 @@ namespace WebFormatInjection
 
             return hwr;
         }
-
-        public async System.Threading.Tasks.Task<HttpWebResponse> GetResponseAsync(HttpWebRequest request, string sendData = null)
-        {
-            if (!String.IsNullOrEmpty(sendData))
-            {
-                StreamWriter writer = new StreamWriter(await request.GetRequestStreamAsync());
-                writer.Write(sendData);
-                writer.Close();
-            }
-            return (HttpWebResponse)await request.GetResponseAsync();
-        }
-        public HttpWebRequest CreateNewFormet(string _CRUD, string _Accept, string _ContentType, WebNeedDefualtHeader.Certificate _certificate)
+        public HttpWebRequest CreateNewFormat(CookieContainer cookie, string _CRUD, string _Accept, string _ContentType, WebNeedDefualtHeader.Certificate _certificate, string _userAgent = null)
         {
             HttpWebRequest hwr = (HttpWebRequest)WebRequest.Create(requestUriString);
 
             hwr.Method = _CRUD;
             hwr.Accept = _Accept;
             hwr.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None;
+            if (!String.IsNullOrEmpty(_userAgent))
+            {
+                hwr.UserAgent = _userAgent;
+            }
+            else
+            {
+                hwr.UserAgent = UserAgent;
+            }
+
             if (!string.IsNullOrEmpty(_ContentType))
             {
                 hwr.ContentType = _ContentType;
@@ -125,7 +88,20 @@ namespace WebFormatInjection
             {
                 hwr.ServerCertificateValidationCallback = delegate { return true; };
             }
+            hwr.CookieContainer = cookie;
+
             return hwr;
+        }
+
+        public async System.Threading.Tasks.Task<HttpWebResponse> GetResponseAsync(HttpWebRequest request, string sendData = null)
+        {
+            if (!String.IsNullOrEmpty(sendData))
+            {
+                StreamWriter writer = new StreamWriter(await request.GetRequestStreamAsync());
+                writer.Write(sendData);
+                writer.Close();
+            }
+            return (HttpWebResponse)await request.GetResponseAsync();
         }
 
 
