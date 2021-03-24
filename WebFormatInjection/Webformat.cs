@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using WebFormatInjection.WebNeedDefualtHeader;
-
-namespace WebFormatInjection
+using WebformatInjection.WebNeedDefualtHeader;
+namespace WebformatInjection
 {
     public class Webformat : IDisposable
     {
@@ -18,19 +13,49 @@ namespace WebFormatInjection
         {
             requestUriString = _requestUriString;
         }
-
-        public Webformat(string _requestUriString, string _Refere)
+        public Webformat(string _requestUriString,string _Refere)
         {
             requestUriString = _requestUriString;
             Referer = _Refere;
 
         }
-
- 
-        public HttpWebRequest CreateNewFormat(CookieContainer cookie, string _CRUD, string _Accept, string _ContentType, WebNeedDefualtHeader.Certificate _certificate, WebHeaderCollection _webHeaderCollection, string _userAgent = null)
+        public HttpWebRequest CreateNewFormat(string _CRUD,string _Accept,string _ContentType,WebNeedDefualtHeader.Certificate _certificate, WebHeaderCollection _webHeaderCollection, string _userAgent = null)
         {
             HttpWebRequest hwr = (HttpWebRequest)WebRequest.Create(requestUriString);
 
+            if (!String.IsNullOrEmpty(_userAgent))
+            {
+                hwr.UserAgent = _userAgent;
+            }
+            else
+            {
+                hwr.UserAgent = UserAgent;
+            }
+
+            hwr.Method = _CRUD;
+            hwr.Accept = _Accept;
+            
+            hwr.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None;
+            if (!string.IsNullOrEmpty(_ContentType))
+            {
+                hwr.ContentType = _ContentType;
+            }
+            if (!String.IsNullOrEmpty(Referer))
+            {
+                hwr.Referer = Referer;
+            }
+            if (_certificate.HasFlag(Certificate.True))
+            {
+                hwr.ServerCertificateValidationCallback = delegate { return true; };
+            }
+            hwr.Headers.Add(_webHeaderCollection);
+            
+            return hwr;
+        }
+        public HttpWebRequest CreateNewFormat(CookieContainer cookie, string _CRUD, string _Accept, string _ContentType, WebNeedDefualtHeader.Certificate _certificate, WebHeaderCollection _webHeaderCollection,string _userAgent = null)
+        {
+            HttpWebRequest hwr = (HttpWebRequest)WebRequest.Create(requestUriString);
+            System.Diagnostics.Debug.WriteLine(_userAgent);
             if (!String.IsNullOrEmpty(_userAgent))
             {
                 hwr.UserAgent = _userAgent;
@@ -60,13 +85,10 @@ namespace WebFormatInjection
 
             return hwr;
         }
-        public HttpWebRequest CreateNewFormat(CookieContainer cookie, string _CRUD, string _Accept, string _ContentType, WebNeedDefualtHeader.Certificate _certificate, string _userAgent = null)
+        public HttpWebRequest CreateNewFormat(CookieContainer cookie, string _CRUD, string _Accept, string _ContentType, WebNeedDefualtHeader.Certificate _certificate,string _userAgent = null)
         {
             HttpWebRequest hwr = (HttpWebRequest)WebRequest.Create(requestUriString);
 
-            hwr.Method = _CRUD;
-            hwr.Accept = _Accept;
-            hwr.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None;
             if (!String.IsNullOrEmpty(_userAgent))
             {
                 hwr.UserAgent = _userAgent;
@@ -76,6 +98,9 @@ namespace WebFormatInjection
                 hwr.UserAgent = UserAgent;
             }
 
+            hwr.Method = _CRUD;
+            hwr.Accept = _Accept;
+            hwr.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None;
             if (!string.IsNullOrEmpty(_ContentType))
             {
                 hwr.ContentType = _ContentType;
@@ -89,10 +114,31 @@ namespace WebFormatInjection
                 hwr.ServerCertificateValidationCallback = delegate { return true; };
             }
             hwr.CookieContainer = cookie;
+        
 
             return hwr;
         }
+        public HttpWebRequest CreateNewFormat(string _CRUD, string _Accept, string _ContentType, WebNeedDefualtHeader.Certificate _certificate)
+        {
+            HttpWebRequest hwr = (HttpWebRequest)WebRequest.Create(requestUriString);
 
+            hwr.Method = _CRUD;
+            hwr.Accept = _Accept;
+            hwr.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.None;
+            if (!string.IsNullOrEmpty(_ContentType))
+            {
+                hwr.ContentType = _ContentType;
+            }
+            if (!String.IsNullOrEmpty(Referer))
+            {
+                hwr.Referer = Referer;
+            }
+            if (_certificate.HasFlag(Certificate.True))
+            {
+                hwr.ServerCertificateValidationCallback = delegate { return true; };
+            }
+            return hwr;
+        }
         public async System.Threading.Tasks.Task<HttpWebResponse> GetResponseAsync(HttpWebRequest request, string sendData = null)
         {
             if (!String.IsNullOrEmpty(sendData))
@@ -103,22 +149,18 @@ namespace WebFormatInjection
             }
             return (HttpWebResponse)await request.GetResponseAsync();
         }
-
-
-
-        private bool disposedValue = false;
-        protected virtual void Dispose(bool disposing)
+        private bool disposedValue = false; 
+        protected virtual void Dispose(bool disposing) 
         {
-            if (!disposedValue)
+            if (!disposedValue) 
             {
-                if (disposing)
-                {
+                if (disposing) 
+                { 
 
-                }
-                disposedValue = true;
-            }
+                } 
+               disposedValue = true; 
+            } 
         }
-
         public void Dispose()
         {
             Dispose(true);
